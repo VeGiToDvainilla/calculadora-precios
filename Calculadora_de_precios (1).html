@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Precios · B Y R P A C K</title>
+<style>
+  :root{
+    --bg:#f7f7f5;
+    --panel:#ffffff;
+    --ink:#1c2321;
+    --sub:#5b655f;
+    --line:#dfe3df;
+    --accent:#2f6f4f;
+    --accent-soft:#e7f1eb;
+    --warn:#b3401f;
+    --warn-soft:#fbe9e2;
+    --radius:6px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px;
+    line-height:1.4;
+  }
+  header{
+    background:var(--ink);
+    color:#fff;
+    padding:20px 28px;
+  }
+  header h1{
+    margin:0;
+    font-size:20px;
+    letter-spacing:0.06em;
+    font-weight:700;
+  }
+  header p{
+    margin:4px 0 0;
+    font-size:12.5px;
+    color:#c7ccc8;
+  }
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:24px 20px 80px;
+  }
+  section{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:20px;
+  }
+  section h2{
+    margin:0 0 4px;
+    font-size:15px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--ink);
+  }
+  section .desc{
+    margin:0 0 16px;
+    color:var(--sub);
+    font-size:12.5px;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  th{
+    text-align:left;
+    font-weight:600;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    color:var(--sub);
+    padding:6px 6px;
+    border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  td{
+    padding:4px 6px;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  td.readonly{
+    color:var(--sub);
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+  }
+  input, select{
+    width:100%;
+    padding:6px 7px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    font-size:13px;
+    font-family:inherit;
+    background:#fff;
+    color:var(--ink);
+  }
+  input:focus, select:focus{
+    outline:none;
+    border-color:var(--accent);
+  }
+  input[type="number"]{
+    text-align:right;
+  }
+  .col-nombre{min-width:220px;}
+  .col-sm{width:70px;}
+  .col-xs{width:56px;}
+  .col-price{width:110px;}
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 14px;
+    border-radius:4px;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn:hover{opacity:0.88;}
+  .btn.secondary{
+    background:#fff;
+    color:var(--ink);
+    border-color:var(--line);
+  }
+  .btn.secondary:hover{border-color:var(--ink);}
+  .btn.danger{
+    background:transparent;
+    border:none;
+    color:var(--warn);
+    padding:4px 6px;
+    font-weight:700;
+    font-size:15px;
+  }
+  .row-actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:14px;
+  }
+  .grid-4{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+  }
+  .grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  @media (max-width:720px){
+    .grid-4{grid-template-columns:repeat(2,1fr);}
+    .grid-3{grid-template-columns:1fr;}
+  }
+  .field label{
+    display:block;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    color:var(--sub);
+    margin-bottom:4px;
+  }
+  .selector{
+    max-width:420px;
+    margin-bottom:18px;
+  }
+  .breakdown{
+    display:grid;
+    grid-template-columns:1fr auto;
+    row-gap:6px;
+    column-gap:12px;
+    max-width:420px;
+    font-size:13.5px;
+  }
+  .breakdown .label{color:var(--sub);}
+  .breakdown .value{
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+  }
+  .breakdown .total-row{
+    border-top:1px solid var(--line);
+    margin-top:4px;
+    padding-top:8px;
+    font-weight:700;
+  }
+  .tiers{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    margin-top:8px;
+  }
+  @media (max-width:720px){
+    .tiers{grid-template-columns:1fr;}
+  }
+  .tier{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    background:var(--accent-soft);
+  }
+  .tier h3{
+    margin:0 0 2px;
+    font-size:12.5px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    color:var(--accent);
+  }
+  .tier .sub{
+    font-size:11.5px;
+    color:var(--sub);
+    margin-bottom:12px;
+  }
+  .tier .price{
+    font-size:26px;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:4px;
+  }
+  .tier .profit{
+    font-size:12.5px;
+    color:var(--sub);
+  }
+  .tier .margin-input{
+    margin-top:12px;
+  }
+  .tier .margin-input label{
+    font-size:10.5px;
+    color:var(--sub);
+    text-transform:uppercase;
+    display:block;
+    margin-bottom:3px;
+  }
+  .notice{
+    background:var(--warn-soft);
+    border:1px solid #eecbba;
+    color:var(--warn);
+    padding:10px 12px;
+    border-radius:4px;
+    font-size:12.5px;
+    margin-bottom:14px;
+    display:none;
+  }
+  .empty-state{
+    text-align:center;
+    color:var(--sub);
+    padding:24px 0;
+    font-size:13px;
+  }
+  .hint{
+    font-size:11.5px;
+    color:var(--sub);
+    margin-top:8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>B Y R P A C K</h1>
+  <p>Desechables · Plásticos — Calculadora de precio de venta por margen</p>
+</header>
+
+<main>
+
+  <!-- SECCIÓN 1: PRODUCTOS COMPRADOS -->
+  <section>
+    <h2>1. Productos comprados</h2>
+    <p class="desc">Captura lo que compraste (datos de factura). El "No. Compra" agrupa productos que vinieron en la misma factura/pedido — el reparto de costos indirectos se hace dentro de cada grupo.</p>
+
+    <div style="overflow-x:auto;">
+      <table id="tabla-productos">
+        <thead>
+          <tr>
+            <th class="col-nombre">Producto</th>
+            <th class="col-sm">Unidad Emp.</th>
+            <th class="col-xs">Cant. Emp.</th>
+            <th class="col-sm">Unidad</th>
+            <th class="col-xs">Cantidad</th>
+            <th class="col-price">Precio</th>
+            <th class="col-xs">No. Compra</th>
+            <th class="col-price">Importe</th>
+            <th class="col-sm">V. Unitario</th>
+            <th class="col-sm">% Compra</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="productos-body"></tbody>
+      </table>
+    </div>
+    <div id="productos-empty" class="empty-state" style="display:none;">Aún no hay productos. Agrega el primero.</div>
+
+    <div class="row-actions">
+      <button class="btn secondary" id="btn-agregar-producto" type="button">+ Agregar producto</button>
+      <div style="font-size:12.5px; color:var(--sub);">Total comprado: <strong id="total-comprado">$0.00</strong></div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 2: COSTOS INDIRECTOS -->
+  <section>
+    <h2>2. Costos y gastos indirectos de la compra</h2>
+    <p class="desc">Monto total de cada rubro para el periodo/compra. Se reparte entre tus productos en proporción a lo que representa cada uno del total comprado (dentro de su mismo No. Compra).</p>
+
+    <div class="grid-4">
+      <div class="field">
+        <label for="costo-transporte">Transporte y movilización</label>
+        <input type="number" id="costo-transporte" value="500" step="0.01" min="0">
+      </div>
+      <div class="field">
+        <label for="costo-alimentos">Alimentos</label>
+        <input type="number" id="costo-alimentos" value="200" step="0.01" min="0">
+      </div>
+      <div class="field">
+        <label for="costo-renta">Renta</label>
+        <input type="number" id="costo-renta" value="50" step="0.01" min="0">
+      </div>
+      <div class="field">
+        <label for="costo-sueldo">Sueldo</label>
+        <input type="number" id="costo-sueldo" value="100" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="grid-4" style="margin-top:14px;">
+      <div class="field">
+        <label for="costo-otro">Otros costos directos</label>
+        <input type="number" id="costo-otro" value="0" step="0.01" min="0">
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 3: CALCULADORA DE PRECIO -->
+  <section>
+    <h2>3. Calculadora de precio de venta</h2>
+    <p class="desc">Elige un producto para ver su costo directo total (precio de compra + costos indirectos que le tocan) y el precio de venta según el margen que quieras ganar.</p>
+
+    <div id="calc-notice" class="notice"></div>
+
+    <div class="selector field">
+      <label for="selector-producto">Producto</label>
+      <select id="selector-producto"><option value="">— agrega productos en la sección 1 —</option></select>
+    </div>
+
+    <div id="calc-content" style="display:none;">
+      <div class="breakdown" id="breakdown"></div>
+
+      <div class="tiers" id="tiers"></div>
+      <p class="hint">Fórmula: Precio de venta = Costo directo ÷ (1 − margen deseado). El margen es sobre el precio de venta, no sobre el costo.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+
+  // ---------- ESTADO ----------
+  let productos = [];
+  let nextId = 1;
+
+  function nuevoProducto(overrides){
+    return Object.assign({
+      id: nextId++,
+      nombre: "",
+      unidadEmpaque: "",
+      cantEmpaque: "",
+      unidad: "",
+      cantidad: "",
+      precio: "",
+      noCompra: ""
+    }, overrides || {});
+  }
+
+  let selectedId = productos[0] ? productos[0].id : null;
+
+  // ---------- DOM REFS ----------
+  const body = document.getElementById('productos-body');
+  const emptyState = document.getElementById('productos-empty');
+  const totalComprado = document.getElementById('total-comprado');
+  const selector = document.getElementById('selector-producto');
+  const calcContent = document.getElementById('calc-content');
+  const calcNotice = document.getElementById('calc-notice');
+  const breakdownEl = document.getElementById('breakdown');
+  const tiersEl = document.getElementById('tiers');
+
+  const inputsCostos = {
+    transporte: document.getElementById('costo-transporte'),
+    alimentos: document.getElementById('costo-alimentos'),
+    renta: document.getElementById('costo-renta'),
+    sueldo: document.getElementById('costo-sueldo'),
+    otro: document.getElementById('costo-otro')
+  };
+
+  let margenes = { t1: 0.40, t2: 0.30, t3: 0.15 };
+
+  // ---------- HELPERS ----------
+  const fmt = n => isFinite(n) ? n.toLocaleString('es-MX', {style:'currency', currency:'MXN'}) : '—';
+  const pctFmt = n => isFinite(n) ? (n*100).toFixed(1)+'%' : '—';
+
+  function calcularDerivados(){
+    // importe y valor unitario
+    productos.forEach(p => {
+      p.importe = (p.cantidad||0) * (p.precio||0);
+      p.valorUnitario = p.cantidad ? p.importe / p.cantidad : 0;
+    });
+    // total por grupo (No. Compra)
+    const totalesGrupo = {};
+    productos.forEach(p => {
+      const g = p.noCompra || 1;
+      totalesGrupo[g] = (totalesGrupo[g]||0) + p.importe;
+    });
+    // % de compra y reparto de costos indirectos
+    const costos = {
+      transporte: parseFloat(inputsCostos.transporte.value) || 0,
+      alimentos: parseFloat(inputsCostos.alimentos.value) || 0,
+      renta: parseFloat(inputsCostos.renta.value) || 0,
+      sueldo: parseFloat(inputsCostos.sueldo.value) || 0,
+      otro: parseFloat(inputsCostos.otro.value) || 0
+    };
+    productos.forEach(p => {
+      const g = p.noCompra || 1;
+      const totalG = totalesGrupo[g] || 0;
+      p.pctCompra = totalG ? p.importe / totalG : 0;
+      p.alocado = {
+        transporte: costos.transporte * p.pctCompra,
+        alimentos: costos.alimentos * p.pctCompra,
+        renta: costos.renta * p.pctCompra,
+        sueldo: costos.sueldo * p.pctCompra,
+        otro: costos.otro * p.pctCompra
+      };
+    });
+    return { totalesGrupo, costos };
+  }
+
+  // ---------- RENDER TABLA ----------
+  function renderTabla(){
+    body.innerHTML = '';
+    emptyState.style.display = productos.length ? 'none' : 'block';
+
+    let totalGeneral = 0;
+
+    productos.forEach(p => {
+      totalGeneral += p.importe || 0;
+      const tr = document.createElement('tr');
+      tr.dataset.id = p.id;
+      tr.innerHTML = `
+        <td><input type="text" data-field="nombre" value="${escapeHtml(p.nombre)}" placeholder="Nombre del producto"></td>
+        <td><input type="text" data-field="unidadEmpaque" value="${escapeHtml(p.unidadEmpaque)}" placeholder="CJA"></td>
+        <td><input type="number" data-field="cantEmpaque" value="${p.cantEmpaque}" min="0" step="1"></td>
+        <td><input type="text" data-field="unidad" value="${escapeHtml(p.unidad)}" placeholder="PZ"></td>
+        <td><input type="number" data-field="cantidad" value="${p.cantidad}" min="0" step="1"></td>
+        <td><input type="number" data-field="precio" value="${p.precio}" min="0" step="0.01"></td>
+        <td><input type="number" data-field="noCompra" value="${p.noCompra}" min="1" step="1"></td>
+        <td class="readonly">${fmt(p.importe)}</td>
+        <td class="readonly">${fmt(p.valorUnitario)}</td>
+        <td class="readonly">${pctFmt(p.pctCompra)}</td>
+        <td><button class="btn danger" data-action="eliminar" title="Eliminar producto">×</button></td>
+      `;
+      body.appendChild(tr);
+    });
+
+    totalComprado.textContent = fmt(totalGeneral);
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // ---------- RENDER SELECTOR ----------
+  function renderSelector(){
+    const prevSelected = selectedId;
+    selector.innerHTML = '';
+    if(!productos.length){
+      selector.innerHTML = '<option value="">— agrega productos en la sección 1 —</option>';
+      selectedId = null;
+      calcContent.style.display = 'none';
+      return;
+    }
+    productos.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.nombre || '(sin nombre)';
+      selector.appendChild(opt);
+    });
+    if(!productos.find(p => p.id === prevSelected)){
+      selectedId = productos[0].id;
+    }
+    selector.value = selectedId;
+    calcContent.style.display = 'block';
+  }
+
+  // ---------- RENDER CALCULADORA ----------
+  function renderCalculadora(){
+    const p = productos.find(x => x.id === selectedId);
+    if(!p){ calcContent.style.display = 'none'; return; }
+
+    calcNotice.style.display = 'none';
+
+    const costoDirecto = p.valorUnitario
+      + p.alocado.transporte + p.alocado.alimentos + p.alocado.renta
+      + p.alocado.sueldo + p.alocado.otro;
+
+    breakdownEl.innerHTML = `
+      <div class="label">Precio de compra (unitario)</div><div class="value">${fmt(p.valorUnitario)}</div>
+      <div class="label">Transporte asignado</div><div class="value">${fmt(p.alocado.transporte)}</div>
+      <div class="label">Alimentos asignado</div><div class="value">${fmt(p.alocado.alimentos)}</div>
+      <div class="label">Renta asignada</div><div class="value">${fmt(p.alocado.renta)}</div>
+      <div class="label">Sueldo asignado</div><div class="value">${fmt(p.alocado.sueldo)}</div>
+      <div class="label">Otros asignado</div><div class="value">${fmt(p.alocado.otro)}</div>
+      <div class="label total-row">Costo directo total</div><div class="value total-row">${fmt(costoDirecto)}</div>
+    `;
+
+    const tiersData = [
+      { key:'t1', titulo:'1 a 4 unidades', sub:'Precio por unidad', margen: margenes.t1 },
+      { key:'t2', titulo:'5 a 9 unidades', sub:'Precio menudeo', margen: margenes.t2 },
+      { key:'t3', titulo:'10 o más unidades', sub:'Precio mayoreo', margen: margenes.t3 }
+    ];
+
+    let algunMargenInvalido = false;
+
+    tiersEl.innerHTML = tiersData.map(t => {
+      let precioVenta, ganancia;
+      if(t.margen >= 1){
+        algunMargenInvalido = true;
+        precioVenta = NaN; ganancia = NaN;
+      } else {
+        precioVenta = costoDirecto / (1 - t.margen);
+        ganancia = precioVenta - costoDirecto;
+      }
+      return `
+        <div class="tier">
+          <h3>${t.titulo}</h3>
+          <div class="sub">${t.sub}</div>
+          <div class="price">${fmt(precioVenta)}</div>
+          <div class="profit">Ganancia neta: ${fmt(ganancia)}</div>
+          <div class="margin-input">
+            <label for="margen-${t.key}">Margen deseado (%)</label>
+            <input type="number" id="margen-${t.key}" data-tier="${t.key}" value="${(t.margen*100).toFixed(1)}" min="0" max="99" step="0.5">
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if(algunMargenInvalido){
+      calcNotice.textContent = 'Un margen de 100% o más no es válido (la fórmula precio = costo ÷ (1-margen) se rompe). Bájalo por debajo de 100%.';
+      calcNotice.style.display = 'block';
+    }
+  }
+
+  function renderAll(){
+    calcularDerivados();
+    renderTabla();
+    renderSelector();
+    renderCalculadora();
+  }
+
+  // ---------- EVENTOS ----------
+  document.getElementById('btn-agregar-producto').addEventListener('click', () => {
+    const p = nuevoProducto({ noCompra: productos.length ? productos[productos.length-1].noCompra : 1 });
+    productos.push(p);
+    renderAll();
+  });
+
+  body.addEventListener('input', e => {
+    const tr = e.target.closest('tr');
+    if(!tr) return;
+    const id = parseInt(tr.dataset.id, 10);
+    const p = productos.find(x => x.id === id);
+    if(!p) return;
+    const field = e.target.dataset.field;
+    if(!field) return;
+    if(field === 'cantEmpaque' || field === 'cantidad' || field === 'precio' || field === 'noCompra'){
+      p[field] = parseFloat(e.target.value) || 0;
+    } else {
+      p[field] = e.target.value;
+    }
+    calcularDerivados();
+    // solo refrescamos las celdas calculadas de esa fila + totales, sin perder el foco del input
+    refrescarFilaCalculada(tr, p);
+    totalComprado.textContent = fmt(productos.reduce((s,x)=>s+x.importe,0));
+    renderSelector();
+    renderCalculadora();
+    // si el nombre cambió, refleja en el <option> sin rehacer el select entero (evita perder foco si se edita el nombre del seleccionado)
+    if(field === 'nombre'){
+      const opt = selector.querySelector(`option[value="${id}"]`);
+      if(opt) opt.textContent = p.nombre || '(sin nombre)';
+    }
+  });
+
+  function refrescarFilaCalculada(tr, p){
+    const cells = tr.querySelectorAll('td.readonly');
+    cells[0].textContent = fmt(p.importe);
+    cells[1].textContent = fmt(p.valorUnitario);
+    cells[2].textContent = pctFmt(p.pctCompra);
+  }
+
+  body.addEventListener('click', e => {
+    if(e.target.dataset.action === 'eliminar'){
+      const tr = e.target.closest('tr');
+      const id = parseInt(tr.dataset.id, 10);
+      productos = productos.filter(p => p.id !== id);
+      renderAll();
+    }
+  });
+
+  Object.values(inputsCostos).forEach(inp => {
+    inp.addEventListener('input', () => {
+      calcularDerivados();
+      renderTabla();
+      renderCalculadora();
+    });
+  });
+
+  selector.addEventListener('change', () => {
+    selectedId = parseInt(selector.value, 10);
+    renderCalculadora();
+  });
+
+  tiersEl.addEventListener('input', e => {
+    const tier = e.target.dataset.tier;
+    if(!tier) return;
+    let val = parseFloat(e.target.value);
+    if(isNaN(val)) val = 0;
+    margenes[tier] = val / 100;
+    renderCalculadora();
+  });
+
+  // ---------- INIT ----------
+  renderAll();
+
+})();
+</script>
+
+</body>
+</html>
